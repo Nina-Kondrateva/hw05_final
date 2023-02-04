@@ -10,7 +10,8 @@ from .models import Group, Post, Comment, Follow, User
 @cache_page(20, key_prefix="index_page")
 def index(request):
     """Функция главной страницы."""
-    context = get_page(Post.objects.all(), request)
+    context = get_page(Post.objects.select_related(
+        'group', 'author').all(), request)
     return render(request, 'posts/index.html', context)
 
 
@@ -32,7 +33,7 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     if request.user.is_authenticated:
         following = Follow.objects.filter(
-            user=request.user, author=author)
+            user=request.user, author=author).exists()
     context = {
         'author': author,
         'following': following,
@@ -45,7 +46,8 @@ def post_detail(request, post_id):
     """Функция страницы отдельного поста."""
     post = get_object_or_404(Post, pk=post_id)
     form = CommentForm(request.POST or None)
-    comments = Comment.objects.filter(post=post)
+    comments = Comment.objects.select_related(
+        'author').filter(post=post)
     context = {
         'post': post,
         'form': form,

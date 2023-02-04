@@ -47,9 +47,8 @@ class PostModelTest(TestCase):
     def test_authorized_unfollows(self):
         """Авторизованный пользователь может отписываться от других
         пользователей."""
-        self.authorized_client.get(
-            reverse('posts:profile_follow',
-                    kwargs={'username': PostModelTest.author}))
+        Follow.objects.create(user=PostModelTest.user,
+                              author=PostModelTest.author)
         self.assertTrue(Follow.objects.filter(
             user=PostModelTest.user,
             author=PostModelTest.author,
